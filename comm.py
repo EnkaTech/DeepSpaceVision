@@ -33,15 +33,7 @@ if __name__ == "__main__":
     cap = get_robot_camera('10.69.85.2')
     print('Bağlantı başarılı')
     while True:
-        '''
-        try:
-            cap = get_cv_stream()
-        except TypeError:
-            nt_init('10.69.85.2')
-            continue
-        '''
         ret, frame = cap.read()
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         _, threshold = cv2.threshold(frame, 180, 255, cv2.THRESH_BINARY)
         cv2.imshow('Video', threshold)
         if cv2.waitKey(1) & 0xFF == 27:

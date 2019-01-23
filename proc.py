@@ -61,7 +61,6 @@ def calculate_errors(contours):
     except IndexError:
         return False, 0, 0
     if cv2.contourArea(cnt1) < 1200 or cv2.contourArea(cnt2) < 1200 :
-        print('Target yok')
         return False, 0, 0
     x1, y1, w1, h1 = cv2.boundingRect(cnt1)
     x2, y2, w2, h2 = cv2.boundingRect(cnt2)
