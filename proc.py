@@ -26,6 +26,7 @@ def detect_targets(cap):
         filter2 = cv2.morphologyEx(filter2, cv2.MORPH_CLOSE, kernel2)
         filter1 = cv2.morphologyEx(filter1, cv2.MORPH_OPEN, kernel)
         filter1 = cv2.morphologyEx(filter1, cv2.MORPH_CLOSE, kernel2)
+        #Fitreleri birleştir
         result = cv2.bitwise_or(filter1,filter2)
         #Kontur bul
         contours, hierarchy = cv2.findContours(result,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
@@ -38,13 +39,14 @@ def rectangle(img, contours, hierarchy):
         cnt1 = contours[0]
         cnt2 = contours[1]
     except IndexError:
-        print('Target yok')
         return img
+    #Targetları dikdörtgen içine al
     rect1 = cv2.minAreaRect(cnt1)
     box1 = cv2.boxPoints(rect1)
     rect2 = cv2.minAreaRect(cnt2)
     box2 = cv2.boxPoints(rect2)
     box1 = np.int0(box1)
+    #Targetları düzgün dikdörtgen içine al
     x1, y1, w1, h1 = cv2.boundingRect(cnt1)
     x2, y2, w2, h2 = cv2.boundingRect(cnt2)
     cv2.rectangle(img,(x1,y1),(x1+w1,y1+h1),(0,255,0),2)
@@ -60,14 +62,18 @@ def calculate_errors(contours):
         cnt2 = contours[1]
     except IndexError:
         return False, 0, 0
+    #Küçük noktaları algılama
     if cv2.contourArea(cnt1) < 1200 or cv2.contourArea(cnt2) < 1200 :
         return False, 0, 0
+    #Target etrafında dikdörtgensel bölge oluştur
     x1, y1, w1, h1 = cv2.boundingRect(cnt1)
     x2, y2, w2, h2 = cv2.boundingRect(cnt2)
+    #Target genişliği arasındaki fark -> Dönme hatası
     if x2 > x1:
         z_error = w2 - w1
     else:
         z_error = w1 - w2
+    #Targetların ekran kenarına olan uzaklığı arasındaki fark -> Y eksenindeki hata
     y_error = x1 - (640 - (x2+w2))
     return True, z_error, y_error
 
