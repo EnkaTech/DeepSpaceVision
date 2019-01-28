@@ -12,22 +12,25 @@ def detect_targets(cap):
     if ret:
         # Renk filtresi
         hsv = cv2.cvtColor(capture, cv2.COLOR_BGR2HSV)
-        lower_range = np.array([65,100,185])
-        upper_range = np.array([75,160,255])
+        lower_range = np.array([65,85,155])
+        upper_range = np.array([75,160,220])
         mask = cv2.inRange(hsv, lower_range, upper_range)
         mask = cv2.blur(mask, (3, 3))
         _, filter1 = cv2.threshold(mask,127,255,cv2.THRESH_BINARY)
         # Beyazlık filtresi
         gray = cv2.cvtColor(capture, cv2.COLOR_BGR2GRAY)
         blur = cv2.blur(gray, (3, 3))
-        _, filter2 = cv2.threshold(gray,200,255,cv2.THRESH_BINARY)
+        _, filter2 = cv2.threshold(gray,240,255,cv2.THRESH_BINARY)
         # Arkaplandaki beyaz noktaları ve cisim üzerindeki siyah noktaları yok et
         filter2 = cv2.morphologyEx(filter2, cv2.MORPH_OPEN, kernel)
         filter2 = cv2.morphologyEx(filter2, cv2.MORPH_CLOSE, kernel2)
-        filter1 = cv2.morphologyEx(filter1, cv2.MORPH_OPEN, kernel)
-        filter1 = cv2.morphologyEx(filter1, cv2.MORPH_CLOSE, kernel2)
+        #filter1 = cv2.morphologyEx(filter1, cv2.MORPH_OPEN, kernel)
+        #filter1 = cv2.morphologyEx(filter1, cv2.MORPH_CLOSE, kernel2)
         #Fitreleri birleştir
         result = cv2.bitwise_or(filter1,filter2)
+        result = cv2.morphologyEx(result, cv2.MORPH_OPEN, kernel)
+        result = cv2.morphologyEx(result, cv2.MORPH_CLOSE, kernel2)
+        result = filter2
         #Kontur bul
         contours, hierarchy = cv2.findContours(result,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
         return capture, result, contours, hierarchy
@@ -44,15 +47,16 @@ def rectangle(img, contours, hierarchy):
     rect1 = cv2.minAreaRect(cnt1)
     box1 = cv2.boxPoints(rect1)
     rect2 = cv2.minAreaRect(cnt2)
-    box2 = cv2.boxPoints(rect2)
     box1 = np.int0(box1)
+    box2 = cv2.boxPoints(rect2)
+    box2 = np.int0(box2)
     #Targetları düzgün dikdörtgen içine al
-    x1, y1, w1, h1 = cv2.boundingRect(cnt1)
-    x2, y2, w2, h2 = cv2.boundingRect(cnt2)
+    x1, y1, w1, h1 = cv2.boundingRect(box1)
+    x2, y2, w2, h2 = cv2.boundingRect(box2)
     cv2.rectangle(img,(x1,y1),(x1+w1,y1+h1),(0,255,0),2)
     cv2.rectangle(img,(x2,y2),(x2+w2,y2+h2),(0,255,0),2)
     cv2.drawContours(img,[box1],0,(0,0,255),2)
-    box2 = np.int0(box2)
+
     cv2.drawContours(img,[box2],0,(0,0,255),2)
     return img
 
@@ -66,15 +70,31 @@ def calculate_errors(contours):
     if cv2.contourArea(cnt1) < 1200 or cv2.contourArea(cnt2) < 1200 :
         return False, 0, 0
     #Target etrafında dikdörtgensel bölge oluştur
-    x1, y1, w1, h1 = cv2.boundingRect(cnt1)
-    x2, y2, w2, h2 = cv2.boundingRect(cnt2)
+    rect1 = cv2.minAreaRect(cnt1)
+    box1 = cv2.boxPoints(rect1)
+    box1 = np.int0(box1)
+    rect2 = cv2.minAreaRect(cnt2)
+    box2 = cv2.boxPoints(rect2)
+    box2 = np.int0(box2)
+    x1, y1, w1, h1 = cv2.boundingRect(box1)
+    x2, y2, w2, h2 = cv2.boundingRect(box2)
+    area1 = cv2.contourArea(box1) 
+    area2 = cv2.contourArea(box2)
+    M1 = cv2.moments(box1)
+    M2 = cv2.moments(box2)
+    c1 = int(M1['m10']/M1['m00'])
+    c2 = int(M2['m10']/M2['m00'])
     #Target genişliği arasındaki fark -> Dönme hatası
     if x2 > x1:
-        z_error = w2 - w1
+        z_error = area2 - area1
+        
     else:
-        z_error = w1 - w2
+        z_error = area1 - area2
     #Targetların ekran kenarına olan uzaklığı arasındaki fark -> Y eksenindeki hata
-    y_error = x1 - (640 - (x2+w2))
+    if x2 > x1:
+        y_error = c1 - (640 - c2)
+    else:
+        y_error = (640 - c2) - c1
     return True, z_error, y_error
 
 

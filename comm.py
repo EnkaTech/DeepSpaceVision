@@ -34,7 +34,8 @@ if __name__ == "__main__":
     print('Bağlantı başarılı')
     while True:
         ret, frame = cap.read()
-        _, threshold = cv2.threshold(frame, 180, 255, cv2.THRESH_BINARY)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        _, threshold = cv2.threshold(frame, 240, 255, cv2.THRESH_BINARY)
         cv2.imshow('Video', threshold)
         if cv2.waitKey(1) & 0xFF == 27:
             exit(0)

@@ -9,11 +9,11 @@ if __name__ == '__main__':
     proc_table = NetworkTables.getTable('imgproc')
     while cam.isOpened:
         capture, result, contours, hierarchy = detect_targets(cam)
-        result = rectangle(capture, contours, hierarchy)
+        capture = rectangle(capture, contours, hierarchy)
 
         cv2.imshow('Kamera', capture)
         cv2.imshow('Filtre', result)
-        success, h_error, r_error = calculate_errors(contours)
+        success, r_error, h_error = calculate_errors(contours)
         proc_table.putBoolean('Target algılandı', success)
         proc_table.putNumber('Rotate error', r_error)
         proc_table.putNumber('Horizontal error', h_error)
