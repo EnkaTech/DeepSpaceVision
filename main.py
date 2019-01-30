@@ -5,7 +5,9 @@ import numpy as np
 from networktables import NetworkTables
 
 if __name__ == '__main__':
+    print('Robota bağlanıyor')
     cam = get_robot_camera('10.69.85.2')
+    print('Robota bağlandı')
     proc_table = NetworkTables.getTable('imgproc')
     while cam.isOpened:
         capture, result, contours, hierarchy = detect_targets(cam)

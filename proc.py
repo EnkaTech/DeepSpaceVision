@@ -86,15 +86,20 @@ def calculate_errors(contours):
     c2 = int(M2['m10']/M2['m00'])
     #Target genişliği arasındaki fark -> Dönme hatası
     if x2 > x1:
-        z_error = area2 - area1
-        
+        if c1 >= 300:
+            z_error = 1
+        else:
+            z_error = -1
     else:
-        z_error = area1 - area2
+        if c2 >= 300:
+            z_error = 1
+        else:
+            z_error = -1
     #Targetların ekran kenarına olan uzaklığı arasındaki fark -> Y eksenindeki hata
     if x2 > x1:
-        y_error = c1 - (640 - c2)
+        y_error = c1
     else:
-        y_error = (640 - c2) - c1
+        y_error = c2
     return True, z_error, y_error
 
 
