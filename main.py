@@ -10,11 +10,10 @@ if __name__ == '__main__':
     print('Robota bağlandı')
     proc_table = NetworkTables.getTable('imgproc')
     while cam.isOpened:
-        capture, result, contours, hierarchy = detect_targets(cam)
-        capture = rectangle(capture, contours, hierarchy)
+        capture, result, contours= detect_targets(cam)
+        capture = rectangle(capture, contours)
 
         cv2.imshow('Kamera', capture)
-        cv2.imshow('Filtre', result)
         success, r_error, h_error = calculate_errors(contours)
         proc_table.putBoolean('Target algılandı', success)
         proc_table.putNumber('Rotate error', r_error)
@@ -22,5 +21,6 @@ if __name__ == '__main__':
         k = cv2.waitKey(5) & 0xFF
         if k == 27:
             break
+
 
     cv2.destroyAllWindows()
