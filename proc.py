@@ -13,17 +13,17 @@ def detect_targets(cap):
         # Beyazlık filtresi
         gray = cv2.cvtColor(capture, cv2.COLOR_BGR2GRAY)
         blur = cv2.blur(gray, (3, 3))
-        _, filter = cv2.threshold(gray,240,255,cv2.THRESH_BINARY)
+        _, filter1 = cv2.threshold(gray,240,255,cv2.THRESH_BINARY)
         # Arkaplandaki beyaz noktaları ve cisim üzerindeki siyah noktaları yok et
-        filter = cv2.morphologyEx(filter, cv2.MORPH_OPEN, kernel)
-        filter = cv2.morphologyEx(filter, cv2.MORPH_CLOSE, kernel2)
+        filter1 = cv2.morphologyEx(filter1, cv2.MORPH_OPEN, kernel)
+        filter1 = cv2.morphologyEx(filter1, cv2.MORPH_CLOSE, kernel2)
         #Kontur bul
-        contours, hierarchy = cv2.findContours(filter,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-        return capture, filter, contours
+        contours, hierarchy = cv2.findContours(filter1,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        return capture, filter1, contours
     else:
         return None, None, None,
 
-def rectangle(img, contours,):
+def rectangle(img, contours):
     try:
         cnt1 = contours[0]
         cnt2 = contours[1]
@@ -40,15 +40,15 @@ def rectangle(img, contours,):
     cv2.drawContours(img,[box2],0,(0,0,255),2)
     return img
 
+def cnt_test(cnt):
+    if cv2.contourArea(cnt) > 200:
+        return True
+    else:
+        return False
+
 def calculate_errors(contours):
-    try:
-        cnt1 = contours[0]
-        cnt2 = contours[1]
-    except IndexError:
-        return False, 0, 0
-    #Küçük noktaları algılama
-    if cv2.contourArea(cnt1) < 200 or cv2.contourArea(cnt2) < 200 :
-        return False, 0, 0
+    cnt1 = contours[0]
+    cnt2 = contours[1]
     #Target etrafında dikdörtgensel bölge oluştur
     rect1 = cv2.minAreaRect(cnt1)
     width1  = min(rect1[1][0], rect1[1][1])
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     while cam.isOpened():
         capture, result, contours= detect_targets(cam)
         result = rectangle(capture, contours, hierarchy)
-        if type(capture) == type(None):
+        if capture is None:
             print('Görüntü yok!')
 
         else:

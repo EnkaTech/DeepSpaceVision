@@ -9,7 +9,7 @@ def nt_init(ip):
 def get_stream_link():
     cam_table = NetworkTables.getTable('CameraPublisher')
     sub_table = cam_table.getSubTable('USB Camera 0')
-    a = sub_table.getEntry('streams').get()[0]
+    a = sub_table.getEntry('streams').get()[1]
     return (a[5:] + '&type=mjpg')
 
 
