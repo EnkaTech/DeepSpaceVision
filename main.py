@@ -15,12 +15,12 @@ if __name__ == '__main__':
         cv2.imshow('Kamera', capture)
 
         # Konturları ayıkla
-        goodContours = filter(cnt_test, contours)
+        goodContours = list(filter(cnt_test, contours))
 
         if len(goodContours) >= 2:
             # Konturlar etrafına kare çek ve hata hesapla
             capture = rectangle(capture, goodContours)
-            r_error, h_error = calculate_errors(goodContours)
+            success, r_error, h_error = calculate_errors(goodContours)
 
             # Sonuçları robota bildir
             proc_table.putBoolean('Target algılandı', True)

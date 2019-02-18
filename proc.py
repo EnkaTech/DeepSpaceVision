@@ -47,8 +47,11 @@ def cnt_test(cnt):
         return False
 
 def calculate_errors(contours):
-    cnt1 = contours[0]
-    cnt2 = contours[1]
+    try:
+        cnt1 = contours[0]
+        cnt2 = contours[1]
+    except IndexError:
+        return False, 0, 0
     #Target etrafında dikdörtgensel bölge oluştur
     rect1 = cv2.minAreaRect(cnt1)
     width1  = min(rect1[1][0], rect1[1][1])
