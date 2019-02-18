@@ -12,7 +12,6 @@ if __name__ == '__main__':
 
     while cam.isOpened:
         capture, result, contours= detect_targets(cam)
-        cv2.imshow('Kamera', capture)
 
         # Konturları ayıkla
         goodContours = list(filter(cnt_test, contours))
@@ -28,6 +27,7 @@ if __name__ == '__main__':
             proc_table.putNumber('Horizontal error', h_error)
         else:
             proc_table.putBoolean('Target algılandı', False)
+        cv2.imshow('Kamera', capture)
         k = cv2.waitKey(5) & 0xFF
         if k == 27:
             break

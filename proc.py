@@ -41,7 +41,12 @@ def rectangle(img, contours):
     return img
 
 def cnt_test(cnt):
-    if cv2.contourArea(cnt) > 200:
+    #0.24
+    rect = cv2.minAreaRect(cnt)
+    width  = min(rect[1][0], rect[1][1])
+    height = max(rect[1][0], rect[1][1])
+    ratio = width/height
+    if cv2.contourArea(cnt) > 200 and ratio > 0.35:
         return True
     else:
         return False
@@ -73,6 +78,8 @@ def calculate_errors(contours):
     M2 = cv2.moments(box2)
     c1 = int(M1['m10']/M1['m00'])
     c2 = int(M2['m10']/M2['m00'])
+    print(ratio1)
+    print(ratio2)
     #Target genişliği arasındaki fark -> Dönme hatası
     if x2 > x1:
         z_error = (ratio1 - ratio2)*100
