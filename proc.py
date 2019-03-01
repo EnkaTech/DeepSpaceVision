@@ -46,10 +46,12 @@ def cnt_test(cnt):
     width  = min(rect[1][0], rect[1][1])
     height = max(rect[1][0], rect[1][1])
     ratio = width/height
-    if cv2.contourArea(cnt) > 200 and ratio > 0.35:
+    if cv2.contourArea(cnt) > 200 and ratio > 0.35 and ratio < 0.8:
         return True
     else:
         return False
+def maap(x, in_min,  in_max,  out_min,  out_max): 
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
 def calculate_errors(contours):
     try:
@@ -78,13 +80,12 @@ def calculate_errors(contours):
     M2 = cv2.moments(box2)
     c1 = int(M1['m10']/M1['m00'])
     c2 = int(M2['m10']/M2['m00'])
+    average = (c1+c2)/2
+    z_error = average - 320
     print(ratio1)
     print(ratio2)
     #Target genişliği arasındaki fark -> Dönme hatası
-    if x2 > x1:
-        z_error = (ratio1 - ratio2)*100
-    else:
-        z_error = (ratio2 - ratio1)*100
+    z_error = maap(z_error, -320, 320,  -30, 30)
     #Targetların ekran merkezine olan uzaklığı arasındaki fark -> Y eksenindeki hata
     y_error = (320-c1) + (320-c2)
     return True, z_error, y_error

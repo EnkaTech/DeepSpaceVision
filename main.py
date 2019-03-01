@@ -23,10 +23,12 @@ if __name__ == '__main__':
 
             # Sonuçları robota bildir
             proc_table.putBoolean('Target algılandı', True)
-            proc_table.putNumber('Rotate error', r_error)
+            proc_table.putNumber('Heading', r_error)
             proc_table.putNumber('Horizontal error', h_error)
         else:
             proc_table.putBoolean('Target algılandı', False)
+            proc_table.putNumber('Heading', 0)
+            proc_table.putNumber('Horizontal error', 0)
         cv2.imshow('Kamera', capture)
         k = cv2.waitKey(5) & 0xFF
         if k == 27:
