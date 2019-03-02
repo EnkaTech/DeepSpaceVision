@@ -46,7 +46,7 @@ def cnt_test(cnt):
     width  = min(rect[1][0], rect[1][1])
     height = max(rect[1][0], rect[1][1])
     ratio = width/height
-    if cv2.contourArea(cnt) > 200 and ratio > 0.35 and ratio < 0.8:
+    if cv2.contourArea(cnt) > 200 and ratio > 0.35 and ratio < 0.6:
         return True
     else:
         return False
@@ -72,10 +72,6 @@ def calculate_errors(contours):
     height2 = max(rect2[1][0], rect2[1][1])
     ratio2  = width2/height2
     box2 = np.int0(box2)
-    x1, y1, _, _ = cv2.boundingRect(box1)
-    x2, y2, _, _ = cv2.boundingRect(box2)
-    area1 = cv2.contourArea(box1)
-    area2 = cv2.contourArea(box2)
     M1 = cv2.moments(box1)
     M2 = cv2.moments(box2)
     c1 = int(M1['m10']/M1['m00'])
