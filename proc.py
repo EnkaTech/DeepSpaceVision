@@ -77,13 +77,13 @@ def calculate_errors(contours):
     c1 = int(M1['m10']/M1['m00'])
     c2 = int(M2['m10']/M2['m00'])
     average = (c1+c2)/2
-    z_error = average - 320
+    z_error = average - 240
     print(ratio1)
     print(ratio2)
     #Target genişliği arasındaki fark -> Dönme hatası
-    z_error = maap(z_error, -320, 320,  -30, 30)
+    z_error = maap(z_error, -240, 240,  -30, 30)
     #Targetların ekran merkezine olan uzaklığı arasındaki fark -> Y eksenindeki hata
-    y_error = (320-c1) + (320-c2)
+    y_error = (240-c1) + (240-c2)
     return True, z_error, y_error
 
 
@@ -91,7 +91,7 @@ if __name__ == '__main__':
     cam = cv2.VideoCapture(0)
     while cam.isOpened():
         capture, result, contours= detect_targets(cam)
-        result = rectangle(capture, contours, hierarchy)
+        result = rectangle(capture, contours)
         if capture is None:
             print('Görüntü yok!')
 
