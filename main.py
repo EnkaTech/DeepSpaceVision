@@ -11,7 +11,7 @@ if __name__ == '__main__':
     proc_table = NetworkTables.getTable('imgproc')
 
     while cam.isOpened:
-        capture, result, contours= detect_targets(cam)
+        capture, contours= detect_targets(cam)
 
         # Konturları ayıkla
         goodContours = list(filter(cnt_test, contours))

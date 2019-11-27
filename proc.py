@@ -12,16 +12,15 @@ def detect_targets(cap):
     if ret:
         # Beyazlık filtresi
         gray = cv2.cvtColor(capture, cv2.COLOR_BGR2GRAY)
-        blur = cv2.blur(gray, (3, 3))
         _, filter1 = cv2.threshold(gray,240,255,cv2.THRESH_BINARY)
         # Arkaplandaki beyaz noktaları ve cisim üzerindeki siyah noktaları yok et
-        filter1 = cv2.morphologyEx(filter1, cv2.MORPH_OPEN, kernel)
-        filter1 = cv2.morphologyEx(filter1, cv2.MORPH_CLOSE, kernel2)
+        filter2 = cv2.morphologyEx(filter1, cv2.MORPH_OPEN, kernel)
+        filter3 = cv2.morphologyEx(filter2, cv2.MORPH_CLOSE, kernel2)
         #Kontur bul
-        contours, hierarchy = cv2.findContours(filter1,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-        return capture, filter1, contours
+        contours, _ = cv2.findContours(filter3,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+        return capture, contours
     else:
-        return None, None, None,
+        return None, None
 
 def rectangle(img, contours):
     try:
@@ -31,17 +30,16 @@ def rectangle(img, contours):
         return img
     #Targetları dikdörtgen içine al
     rect1 = cv2.minAreaRect(cnt1)
-    box1 = cv2.boxPoints(rect1)
+    box_p1 = cv2.boxPoints(rect1)
+    box1 = np.int0(box_p1)
     rect2 = cv2.minAreaRect(cnt2)
-    box1 = np.int0(box1)
-    box2 = cv2.boxPoints(rect2)
-    box2 = np.int0(box2)
+    box_p2 = cv2.boxPoints(rect2)
+    box2 = np.int0(box_p2)
     cv2.drawContours(img,[box1],0,(0,0,255),2)
     cv2.drawContours(img,[box2],0,(0,0,255),2)
     return img
 
 def cnt_test(cnt):
-    #0.24
     rect = cv2.minAreaRect(cnt)
     width  = min(rect[1][0], rect[1][1])
     height = max(rect[1][0], rect[1][1])
@@ -50,6 +48,7 @@ def cnt_test(cnt):
         return True
     else:
         return False
+
 def maap(x, in_min,  in_max,  out_min,  out_max): 
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
@@ -61,27 +60,21 @@ def calculate_errors(contours):
         return False, 0, 0
     #Target etrafında dikdörtgensel bölge oluştur
     rect1 = cv2.minAreaRect(cnt1)
-    width1  = min(rect1[1][0], rect1[1][1])
-    height1 = max(rect1[1][0], rect1[1][1])
-    ratio1  = width1/height1
-    box1 = cv2.boxPoints(rect1)
-    box1 = np.int0(box1)
+    box_p1 = cv2.boxPoints(rect1)
+    box1 = np.int0(box_p1)
+
     rect2 = cv2.minAreaRect(cnt2)
-    box2 = cv2.boxPoints(rect2)
-    width2  = min(rect2[1][0], rect2[1][1])
-    height2 = max(rect2[1][0], rect2[1][1])
-    ratio2  = width2/height2
-    box2 = np.int0(box2)
+    box_p2 = cv2.boxPoints(rect2)
+    box2 = np.int0(box_p2)
+
+    #Targetların ağırlık merkezini bul
     M1 = cv2.moments(box1)
     M2 = cv2.moments(box2)
-    c1 = int(M1['m10']/M1['m00'])
-    c2 = int(M2['m10']/M2['m00'])
-    average = (c1+c2)/2
-    z_error = average - 240
-    print(ratio1)
-    print(ratio2)
-    #Target genişliği arasındaki fark -> Dönme hatası
-    z_error = maap(z_error, -240, 240,  -30, 30)
+    center1 = int(M1['m10']/M1['m00'])
+    center2 = int(M2['m10']/M2['m00'])
+
+    #TODO z ekseninde hata hesabı
+    z_error = 0
     #Targetların ekran merkezine olan uzaklığı arasındaki fark -> Y eksenindeki hata
     y_error = (240-c1) + (240-c2)
     return True, z_error, y_error
@@ -90,7 +83,7 @@ def calculate_errors(contours):
 if __name__ == '__main__':
     cam = cv2.VideoCapture(0)
     while cam.isOpened():
-        capture, result, contours= detect_targets(cam)
+        capture,  contours= detect_targets(cam)
         result = rectangle(capture, contours)
         if capture is None:
             print('Görüntü yok!')
